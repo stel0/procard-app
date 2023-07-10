@@ -1,13 +1,8 @@
-import {useEffect} from 'react'
-
-
+import {VideoCard} from '../components/VideoCard'
 
 export function VideosList() {
-  useEffect(() => {
-    console.log("Pagina cargada");
-  }, []);
   
   return (
-    <div>VideosList</div>
-  )
+      <VideoCard />
+  );
 }
