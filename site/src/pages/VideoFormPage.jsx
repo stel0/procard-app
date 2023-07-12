@@ -1,14 +1,14 @@
 import { useForm } from "react-hook-form";
+//uploadVideo: adds the data to the database
 import { uploadVideo } from "../api/video.api";
 import { AppContext } from "../context/AppContext";
-import { useContext, useState } from "react";
+import { useContext } from "react";
 
 export function VideoFormPage() {
+
   {
     /*loadVideos: para actualizar la lista de videos*/
   }
-  const [fileName, setFileName] = useState(null);
-
   const { loadVideos } = useContext(AppContext);
 
   const {
@@ -18,23 +18,41 @@ export function VideoFormPage() {
   } = useForm();
 
   {
-    /*se ejecuta esta funcion al enviar el formulario*/
+    /* SubmitForm: for send the data via axios */
   }
-  const onsub = async (data) => {
+  const submitForm = (data) => {
     {
-      /*se cargan los datos en la base de datos*/
+      /*
+      formData: for charging the data inside of him
+      */
     }
-    const res = await uploadVideo(data);
-    console.log(res);
+    const formData = new FormData();
+    formData.append("title",data.title);
+    formData.append("file_video", data.file_video[0]);
+
     {
-      /*actualiza la base*/
+      /* The data is loaded into the db via axios to the api with the function uploadVideo */
     }
-    loadVideos();
+    uploadVideo(formData)
+      .then((res) => {
+        console.log("Loaded into the db");
+        console.log(res);
+        {
+          /*refresh the page of the videos*/
+        }
+        loadVideos()
+      })
+      .catch((error) => {
+        console.log("Theres is an error");
+        console.log('Error:',error);
+        console.log(data);
+      });
+    
   };
 
   return (
     <div>
-      <form onSubmit={handleSubmit(onsub)}>
+      <form onSubmit={handleSubmit(submitForm)}>
         <input
           type="text"
           placeholder="title"
