@@ -4,5 +4,5 @@ from .models import Video
 
 class VideoViewSet(viewsets.ModelViewSet):
     serializer_class = videoSerializer
-    queryset = Video.objects.all() # Consulta a todos los videos
+    queryset = Video.objects.all() 
 
