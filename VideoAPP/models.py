@@ -7,3 +7,13 @@ class Video(models.Model):
 
     def __str__(self):
         return self.title
+    
+class User(models.Model):
+    name = models.CharField(max_length=256)
+    last_name = models.CharField(max_length=256)
+    ci = models.CharField(max_length=256)
+    mail = models.CharField(max_length=256)
+    genre = models.CharField(max_length=256)
+
+    def __str__(self):
+        return f"{self.name} {self.last_name} - {self.ci}"

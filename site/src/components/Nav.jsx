@@ -1,10 +1,12 @@
-import {Link} from 'react-router-dom'
+import {NavLink} from 'react-router-dom'
 
-export function Nav() {
+function Nav() {
   return (
     <div>
-      <Link to="/videos">Video app</Link>
-      <Link to="/videos-create">Cargar video</Link>
+      <NavLink to="/home">Inicio</NavLink>
+      <NavLink to="/cursos">Cursos</NavLink>
     </div>
-  )
+  );
 }
+
+export default Nav

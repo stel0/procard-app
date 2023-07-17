@@ -7,6 +7,7 @@ from rest_framework.documentation import include_docs_urls
 
 router = routers.DefaultRouter()
 router.register('videos',views.VideoViewSet,basename='videos')
+router.register('users',views.UserViewSet,basename='users')
 
 urlpatterns = [
     path("api/v1/",include(router.urls)),

@@ -1,8 +1,8 @@
-import {VideosList} from '../components/VideosList'
+import { VideosList } from "../components";
+import React from "react";
 
-
-export function VideosPage() {
-  return (
-    <VideosList/>
-  )
+function VideosPage() {
+  return <VideosList />;
 }
+
+export default VideosPage;

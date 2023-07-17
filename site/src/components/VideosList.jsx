@@ -1,8 +1,9 @@
-import {VideoCard} from '../components/VideoCard'
+import VideoCard from './VideoCard'
 
-export function VideosList() {
-  
+function VideosList() {
   return (
-      <VideoCard />
-  );
+    <VideoCard/>
+  )
 }
+
+export default VideosList
