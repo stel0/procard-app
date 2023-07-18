@@ -14,6 +14,8 @@ class User(models.Model):
     ci = models.CharField(max_length=256)
     mail = models.CharField(max_length=256)
     genre = models.CharField(max_length=256)
+    password = models.CharField(max_length=256)
+    confirm_password = models.CharField(max_length=256)
 
     def __str__(self):
         return f"{self.name} {self.last_name} - {self.ci}"
