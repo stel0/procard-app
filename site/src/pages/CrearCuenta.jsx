@@ -1,48 +1,8 @@
 import { useForm } from "react-hook-form";
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import { AppContext } from "../context/AppContext";
-import { z } from "zod";
 
 function CrearCuenta() {
-  const User = z
-    .object({
-      name: z.string().toLowerCase().max(50).min(2),
-      last_name: z
-        .string({
-          required_error: "Apellidos es requerido",
-          invalid_type_error: "Apellidos deben ser letras",
-        })
-        .toLowerCase()
-        .max(50)
-        .min(2, { message: "Debe ser mayor a 2 caracteres" }),
-      ci: z.number().int().nonnegative().positive().min(1).max(99999999),
-      mail: z
-        .string()
-        .min(3, { message: "Debe ser mayor a 3 caracteres" })
-        .email({ message: "Debe ser un correo valido" }),
-      genre: z
-        .string()
-        .toUpperCase()
-        .max(1, { message: "Debe ser un genero valido" })
-        .refine(
-          (value) => value === "M" || value === "F" || value === "N",
-          "Debe ser un genero valido"
-        ),
-      password: z.string().min(8, { message: "Debe ser mayor a 8 caracteres" }),
-      confirm_password: z
-        .string()
-        .min(8, { message: "Debe ser mayor a 8 caracteres" }),
-    })
-    .superRefine(({ confirm_password, password }, ctx) => {
-      if (password !== confirm_password) {
-        ctx.addIssue({
-          code: "custom",
-          message: "Las contraseñas no coinciden",
-          path: ["confirm_password", "password"],
-        });
-      }
-    });
-
   const {
     register,
     handleSubmit,
@@ -52,16 +12,7 @@ function CrearCuenta() {
   const { submitForm } = useContext(AppContext);
 
   function submitUserForm(data) {
-    data.ci = Number(data.ci);
-    try {
-      User.parse(data);
-    } catch (error) {
-      for(const key in error){
-        console.log(error[key]);
-      }
-      
-    }
-   
+    submitForm(data, "user");
   }
 
   return (
@@ -69,38 +20,126 @@ function CrearCuenta() {
       <div>
         <form onSubmit={handleSubmit(submitUserForm)}>
           <label>Nombre:</label>
-          <input type="text" {...register("name", { required: true })} />
-          {errors.name && <span>Campo incorrecto.</span>}
-
+          <input
+            type="text"
+            {...register("name", {
+              required: "Nombre es requerido.",
+              minLength: {
+                value: 3,
+                message: "El nombre no puede ser menor a 3 letras.",
+              },
+              maxLength: {
+                value: 50,
+                message: "El nombre no puede ser mayor a 50 letras.",
+              },
+              pattern: {
+                value: /^[a-zA-Z]+$/i,
+                message: "El nombre solo puede contener letras.",
+              },
+            })}
+          />
+          {errors.name && <span>{errors.name.message}</span>}
           <label>Apellidos:</label>
-          <input type="text" {...register("last_name", { required: true })} />
-          {errors.last_name && <span>Campo incorrecto.</span>}
-
-          <label>Cedula:</label>
-          <input type="number" {...register("ci", { required: true })} />
-          {errors.ci && <span>Campo incorrecto.</span>}
-
+          <input
+            type="text"
+            {...register("last_name", {
+              required: true,
+              minLength: {
+                value: 3,
+                message: "El apellido no puede ser menor a 3 letras.",
+              },
+              maxLength: {
+                value: 50,
+                message: "El apellido no puede ser mayor a 50 letras.",
+              },
+              pattern: {
+                value: /^[a-zA-Z]+$/i,
+                message: "El apellido solo puede contener letras.",
+              },
+            })}
+          />
+          {errors.last_name && <span>{errors.last_name.message}</span>}
+          <label>Cedula (sin puntos):</label>
+          <input
+            type="text"
+            {...register("ci", {
+              required: "Se requiere la cedula.",
+              maxLength: {
+                value: 8,
+                message: "La cedula no puede ser mayor a 8 digitos.",
+              },
+              pattern: {
+                value: /^[0-9]+$/i,
+                message: "La cedula solo puede contener numeros sin puntos.",
+              },
+            })}
+          />
+          {errors.ci && <span>{errors.ci.message}</span>}
           <label>Correo:</label>
-          <input type="text" {...register("mail", { required: true })} />
-          {errors.mail && <span>Campo incorrecto.</span>}
-
+          <input
+            type="text"
+            {...register("mail", {
+              required: "Correo es requerido.",
+              pattern: {
+                value:
+                  /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+                message: "El correo no es valido.",
+              },
+            })}
+          />
+          {errors.mail && <span>{errors.mail.message}</span>}
           <label>Sexo:</label>
-          <select name="genre" {...register("genre")}>
+          <select
+            name="genre"
+            {...register("genre", {
+              required: true,
+              pattern: {
+                value: /^(M|F|N)$/,
+                message: "El sexo no es valido.",
+              },
+            })}
+          >
             <option value="M">Masculino</option>
             <option value="F">Femenino</option>
             <option value="N">Ninguno</option>
           </select>
-
+          {errors.genre && <span>{errors.genre.message}</span>}
           <label>Contraseña:</label>
-          <input type="text" {...register("password", { required: true })} />
-          {errors.password && <span>Campo incorrecto.</span>}
-
+          <input
+            type="password"
+            id="password"
+            onChange={(e) => {
+              setPassword(e.target.value);
+            }}
+            {...register("password", {
+              required: "La contraseña es requerida.",
+              minLength: {
+                value: 8,
+                message: "La contraseña debe tener al menos 8 caracteres.",
+              },
+              pattern: {
+                value:
+                  /^(?=.*[a-zA-Z])(?=.*[!@#$%^&*()\-_=+[{\]};:'",<.>/?])(?!.*\s).*$/,
+                message:
+                  "Debe contener un número, una letra mayuscula y un caracter especial(!@#$%^&*.)",
+              },
+            })}
+          />
+          {errors.password && <span>{errors.password.message}</span>}
           <label>Repetir contraseña:</label>
           <input
-            type="text"
-            {...register("confirm_password", { required: true })}
+            type="password"
+            {...register("confirm_password", {
+              required: "Confirmar contraseña es requerida",
+              validate: (value) =>
+                value !== document.getElementById("password").value
+                  ? "Las contraseñas no coinciden."
+                  : null,
+            })}
           />
-          {errors.confirm_password && <span>Campo incorrecto.</span>}
+          {errors.confirm_password && (
+            <span>{errors.confirm_password.message}</span>
+          )}
 
           <button>Crear cuenta</button>
         </form>
