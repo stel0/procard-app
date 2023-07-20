@@ -10,3 +10,4 @@ class VideoViewSet(viewsets.ModelViewSet):
 class UserViewSet(viewsets.ModelViewSet):
     serializer_class = userSerializer
     queryset = User.objects.all()
+   

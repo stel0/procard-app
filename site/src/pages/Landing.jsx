@@ -10,7 +10,7 @@ function Landing() {
     formState: { errors },
   } = useForm();
 
-  const { logInVerification } = useContext(AppContext);
+  const { logInVerification, users } = useContext(AppContext);
 
   return (
     <>
@@ -18,17 +18,27 @@ function Landing() {
         <form onSubmit={handleSubmit(logInVerification)}>
           <input
             type="text"
-            placeholder="Ingresa el usuario."
-            {...register("cedula", { required: true })}
+            placeholder="Ingresa tu cedula."
+            {...register("ci", {
+              required: true,
+              maxLength: {
+                value: 8,
+                message: "La cedula no puede ser mayor a 8 letras.",
+              },
+              validate: (value) => {
+                const data = users.data.find((element) => element.ci === value);
+                if (!data) return "No existe el usuario.";
+              },
+            })}
           />
-          {errors.cedula && <span>El nombre del usuario es incorrecto</span>}
+          {errors.ci && <span>{errors.ci.message}</span>}
 
           <input
             type="text"
             placeholder="Ingresa la contraseña."
-            {...register("password_user", { required: true })}
+            {...register("password", { required: true })}
           />
-          {errors.password_user && <span>La contraseña es incorrecta.</span>}
+          {errors.password && <span>La contraseña es incorrecta.</span>}
 
           <button>Entrar</button>
         </form>

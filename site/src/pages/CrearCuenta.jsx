@@ -9,7 +9,7 @@ function CrearCuenta() {
     formState: { errors },
   } = useForm();
 
-  const { submitForm } = useContext(AppContext);
+  const { submitForm, clientErrors } = useContext(AppContext);
 
   function submitUserForm(data) {
     submitForm(data, "user");
@@ -140,8 +140,12 @@ function CrearCuenta() {
           {errors.confirm_password && (
             <span>{errors.confirm_password.message}</span>
           )}
-
           <button>Crear cuenta</button>
+
+          {/*Show the errors from the server side.*/}
+          {clientErrors.inputs.map((element) => (
+            <span>{element.value}</span>
+          ))}
         </form>
       </div>
     </>
