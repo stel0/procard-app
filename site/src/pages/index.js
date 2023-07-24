@@ -1,9 +1,6 @@
-/*Client side*/
-export { default as Home } from "./Home";
-export { default as NotFound } from "./NotFound";
-export { default as VideosPage } from "./VideosPage";
-export { default as Landing } from "./Landing";
-export { default as CrearCuenta } from "./CrearCuenta";
-
-/*Admin site*/
-export { default as AdminPage } from "./AdminPage.jsx";
+export { default as AdminPanel } from './AdminPanel';
+export { default as CourseVideos } from './CourseVideos';
+export { default as CreateAccount } from './CreateAccount';
+export { default as Home } from './Home';
+export { default as Login } from './Login';
+export { default as NotFound } from './NotFound';

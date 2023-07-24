@@ -143,12 +143,12 @@ function CrearCuenta() {
           <button>Crear cuenta</button>
 
           {/*Show the errors from the server side.*/}
-          {clientErrors.inputs.map((element) => (
-            <span>{element.value}</span>
+          {clientErrors.inputs.map((element, index) => (
+            <span key={index}>{element.value}</span>
           ))}
         </form>
       </div>
-    </>
+      </>
   );
 }
 

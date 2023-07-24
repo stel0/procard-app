@@ -4,9 +4,7 @@ import { getVideos, uploadVideo, uploadUser, getUsers } from "../api/video.api";
 export const AppContext = createContext();
 
 export function AppContextProvider(props) {
-  {
-    /*Query de los usuarios*/
-  }
+  /*Data users*/
   const [users, setUsers] = useState(null);
 
   /*clientErrors: error messages for the client side */
@@ -17,25 +15,31 @@ export function AppContextProvider(props) {
 
   /*This function search the user in the database, if exists return true, else return false*/
   const searchUser = (userCreationData) => {
-    /*userExists: if the user already exists*/
+    const inputs = [];
+    /*userExists: if the user already exists */
+    /*OBS: can replace .some() for .find() but i can't test it xD*/
     const userExists = Object.values(users.data).some((user) => {
-      return (
-        userCreationData.ci === user.ci || userCreationData.mail === user.mail
-      );
-    });
-    /*If the user exists then send a error message to the client*/
-    if (userExists) {
       /*Load the entries that are the same as the user registred in the database*/
-      const inputs = [];
-      if (userCreationData.ci)
-        inputs.push({ name: "ci", value: "La cedula ya existe." });
-      if (userCreationData.mail)
-        inputs.push({ name: "mail", value: "El mail ya existe." });
+      /*[{ci},{mail}]*/
+      if (userCreationData.ci === user.ci)
+        inputs.push({
+          name: "ci",
+          value: "Ya existe un usuario con esa cedula.",
+        });
+      if (userCreationData.mail === user.mail)
+        inputs.push({
+          name: "mail",
+          value: "Ya existe un usuario con ese correo.",
+        });
       setClientErrors({
         msg: "El usuario ya existe.",
         inputs: inputs,
       });
-    }
+      /*Returns true if the user already exists*/
+      return (
+        userCreationData.ci === user.ci || userCreationData.mail === user.mail
+      );
+    });
 
     return userExists;
   };
@@ -96,24 +100,34 @@ export function AppContextProvider(props) {
       /*refresh the get data*/
       reLoadAll();
     } catch (error) {
-      /*In case of an error in the uploadUser() function*/
+      /*In case of an error in the axios call*/
       console.log(`${type} error`);
       console.log(error);
       console.log(formData);
     }
   };
 
-  const logInVerification = async (logInData /*=login data*/) => {
-    const usersDb = users; /*users table*/
-    /*Searching the user in the db*/
-    const user = await usersDb.data.filter(
-      (element) => element.ci === logInData.ci
-    );
-    /*If the user is not empty enter the app*/
-    if (user.length > 0) {
-      console.log("User found");
-      console.log(user);
+  const [loginError, setLoginError] = useState(null);
+
+  const login = async (loginData /*=login data*/) => {
+    // const usersDb = users; /*users table*/
+    // /*Searching the user in the db*/
+    // const user = usersDb.data.find((element) => element.ci === loginData.ci);
+    // /*If the user is not empty enter the app*/
+    // if (user) {
+    //   if (user.password !== loginData.password) {
+    //     setLoginError("password");
+    //   }
+    // } else {
+    //   setLoginError("user");
+    // }
+
+    if (searchUser(!loginData)) {
+      if (!clientErrors.inputs) setLoginError("user");
     } else {
+      clientErrors.inputs.forEach((input) => {
+        setLoginError(input.name);
+      })
     }
   };
 
@@ -123,7 +137,7 @@ export function AppContextProvider(props) {
         /*Passing the functions */
         videos,
         submitForm,
-        logInVerification,
+        login,
         clientErrors,
       }}
     >

@@ -2,6 +2,7 @@ import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
 import { useContext } from "react";
 import { AppContext } from "../context/AppContext";
+import { PrivateRoutes } from '../routes/routes.js'
 
 function Landing() {
   const {
@@ -10,25 +11,17 @@ function Landing() {
     formState: { errors },
   } = useForm();
 
-  const { logInVerification, users } = useContext(AppContext);
+  const { login, users, loginError } = useContext(AppContext);
 
   return (
     <>
       <div>
-        <form onSubmit={handleSubmit(logInVerification)}>
+        <form onSubmit={handleSubmit(login)}>
           <input
             type="text"
             placeholder="Ingresa tu cedula."
             {...register("ci", {
-              required: true,
-              maxLength: {
-                value: 8,
-                message: "La cedula no puede ser mayor a 8 letras.",
-              },
-              validate: (value) => {
-                const data = users.data.find((element) => element.ci === value);
-                if (!data) return "No existe el usuario.";
-              },
+              required: "La cedula es necesario.",
             })}
           />
           {errors.ci && <span>{errors.ci.message}</span>}
@@ -36,16 +29,24 @@ function Landing() {
           <input
             type="text"
             placeholder="Ingresa la contraseña."
-            {...register("password", { required: true })}
+            {...register("password", {
+              required: "La contraseña es necesaria.",
+            })}
           />
-          {errors.password && <span>La contraseña es incorrecta.</span>}
+          {errors.password && <span>{errors.password.message}</span>}
+          {loginError === "password" && (
+            <span>La contraseña es incorrecta</span>
+          )}
 
           <button>Entrar</button>
+          {loginError === "user" && (
+            <span>La contraseña o cedula es incorrecta</span>
+          )}
         </form>
       </div>
       <div>
         <p>Eres nuevo?</p>
-        <Link to="/crear-cuenta">Crea una cuenta ;)</Link>
+        <Link to={PrivateRoutes.CREATE_ACCOUNT}>Crear cuenta</Link>
       </div>
     </>
   );
