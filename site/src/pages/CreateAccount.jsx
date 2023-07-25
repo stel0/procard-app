@@ -9,7 +9,7 @@ function CrearCuenta() {
     formState: { errors },
   } = useForm();
 
-  const { submitForm, clientErrors } = useContext(AppContext);
+  const { submitForm,clientMsg } = useContext(AppContext);
 
   function submitUserForm(data) {
     submitForm(data, "user");
@@ -143,9 +143,7 @@ function CrearCuenta() {
           <button>Crear cuenta</button>
 
           {/*Show the errors from the server side.*/}
-          {clientErrors.inputs.map((element, index) => (
-            <span key={index}>{element.value}</span>
-          ))}
+          {clientMsg};
         </form>
       </div>
       </>

@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
 import { useContext } from "react";
 import { AppContext } from "../context/AppContext";
-import { PrivateRoutes } from '../routes/routes.js'
+import { PrivateRoutes } from "../routes/routes.js";
 
 function Landing() {
   const {
@@ -11,7 +11,7 @@ function Landing() {
     formState: { errors },
   } = useForm();
 
-  const { login, users, loginError } = useContext(AppContext);
+  const { login, clientMsg } = useContext(AppContext);
 
   return (
     <>
@@ -34,14 +34,9 @@ function Landing() {
             })}
           />
           {errors.password && <span>{errors.password.message}</span>}
-          {loginError === "password" && (
-            <span>La contraseña es incorrecta</span>
-          )}
 
-          <button>Entrar</button>
-          {loginError === "user" && (
-            <span>La contraseña o cedula es incorrecta</span>
-          )}
+          <button>Iniciar sesion</button>
+          {clientMsg}
         </form>
       </div>
       <div>
