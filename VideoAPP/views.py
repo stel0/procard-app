@@ -56,6 +56,7 @@ class userView(APIView):
 
 
 class uploadVideoView(APIView):
+    ## auth if the user is admin
     permission_classes = (permissions.IsAdminUser,)
     authentication_classes = (SessionAuthentication,)
     ##
