@@ -1,15 +1,13 @@
-from django.urls import path,include
-from rest_framework import routers
+from django.urls import path
 from VideoAPP import views
 from rest_framework.documentation import include_docs_urls
 
-#api versioning
-
-router = routers.DefaultRouter()
-router.register('videos',views.VideoViewSet,basename='videos')
-router.register('users',views.UserViewSet,basename='users')
-
 urlpatterns = [
-    path("api/v1/",include(router.urls)),
-    path("docs/",include_docs_urls(title="Video API"))
+    # path("api/v1/",include(router.urls)),
+    path("docs/",include_docs_urls(title="Video API")),
+    path("login",views.userLogin.as_view()),
+    path("register",views.userRegister.as_view()),
+    path("logout",views.userLogout.as_view()),
+    path("user",views.userView.as_view()),
+    path("upload_video",views.uploadVideoView.as_view()),
 ] 

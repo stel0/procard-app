@@ -9,9 +9,10 @@ function CrearCuenta() {
     formState: { errors },
   } = useForm();
 
-  const { submitForm,clientMsg } = useContext(AppContext);
+  const { submitForm, createUserMsg } = useContext(AppContext);
 
   function submitUserForm(data) {
+    console.log("Cargando datos...");
     submitForm(data, "user");
   }
 
@@ -131,22 +132,40 @@ function CrearCuenta() {
             type="password"
             {...register("confirm_password", {
               required: "Confirmar contraseña es requerida",
-              validate: (value) =>
-                value !== document.getElementById("password").value
+              validate: (value) => {
+                return value !== document.getElementById("password").value
                   ? "Las contraseñas no coinciden."
-                  : null,
+                  : null;
+              },
             })}
           />
           {errors.confirm_password && (
             <span>{errors.confirm_password.message}</span>
           )}
+
+          <select
+            name="permissions"
+            {...register("permissions", {
+              required: true,
+              validate: (value) => {
+                return value === "admin" || value === "user"
+                  ? null
+                  : "El rol no es valido.";
+              },
+            })}
+          >
+            <option value="user">Usuario</option>
+            <option value="admin">Administrador</option>
+          </select>
+          {errors.permissions && <span>{errors.permissions.message}</span>}
+
           <button>Crear cuenta</button>
 
           {/*Show the errors from the server side.*/}
-          {clientMsg};
+          {createUserMsg}
         </form>
       </div>
-      </>
+    </>
   );
 }
 

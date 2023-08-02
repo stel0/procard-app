@@ -1,9 +1,8 @@
-import {useContext} from 'react'
-import {AppContext} from '../context/AppContext'
+import { useContext } from "react";
+import { AppContext } from "../context/AppContext";
 
 function VideoCard() {
-
-  const {videos} = useContext(AppContext);
+  const { videos } = useContext(AppContext);
 
   return (
     <div>
@@ -20,4 +19,4 @@ function VideoCard() {
   );
 }
 
-export default VideoCard
+export default VideoCard;

@@ -1,12 +1,13 @@
-import {Nav} from '../components'
+import { Nav } from "../components";
 
 function Home() {
   return (
     <div>
-      <Nav/>
+      <Nav />
+      
       Home
     </div>
   );
 }
 
-export default Home
+export default Home;

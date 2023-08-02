@@ -12,14 +12,8 @@ export const editVideo = (data) => videoApi_videos.put("/", data);
 const videoApi_users = axios.create({
   baseURL: "http://127.0.0.1:8000/videos/api/v1/users/",
 });
-export const getUsers = () => videoApi_users.get("/");
 export const getUser = (data) =>
-  videoApi_users
-    .get("/", {
-      params: { ci: data.ci },
-    })
-    .then((res) => console.log(data))
-    .catch((err) => console.log(err));
-export const uploadUser = (data) => videoApi_users.post("/", data);
-export const deleteUser = (data) => videoApi_users.delete("/", data);
-export const editUser = (data) => videoApi_users.put("/", data);
+  videoApi_users.get("/", {
+    params: { ci: data.ci },
+  });
+

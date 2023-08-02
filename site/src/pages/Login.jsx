@@ -1,17 +1,24 @@
 import { useForm } from "react-hook-form";
-import { Link } from "react-router-dom";
-import { useContext } from "react";
+import { Link,useNavigate } from "react-router-dom";
+import { useContext, useEffect } from "react";
 import { AppContext } from "../context/AppContext";
 import { PrivateRoutes } from "../routes/routes.js";
 
 function Landing() {
+  const navigate = useNavigate();
+
   const {
     handleSubmit,
     register,
     formState: { errors },
   } = useForm();
 
-  const { login, clientMsg } = useContext(AppContext);
+  const { login, userLoginMsg, loggedUser } = useContext(AppContext);
+
+  useEffect(() => {
+    console.log(loggedUser.name)
+    if (loggedUser.name) navigate(PrivateRoutes.HOME);
+  }, [loggedUser.name]);
 
   return (
     <>
@@ -36,7 +43,7 @@ function Landing() {
           {errors.password && <span>{errors.password.message}</span>}
 
           <button>Iniciar sesion</button>
-          {clientMsg}
+          {userLoginMsg}
         </form>
       </div>
       <div>
