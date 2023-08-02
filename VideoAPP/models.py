@@ -4,7 +4,7 @@ from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 
 
 class AppUserManager(BaseUserManager):
-    def create_user(self, ci, email, password=None):
+    def create_user(self, first_name, last_name, ci, email, genre, password=None):
         if not ci:
             raise ValueError('An ci is required.')
         if not email:
@@ -12,13 +12,24 @@ class AppUserManager(BaseUserManager):
         if not password:
             raise ValueError('A password is required.')
         email = self.normalize_email(email)
-        user = self.model(email=email, ci=ci)
+        user = self.model(
+            email=email, 
+            ci=ci,
+            first_name=first_name, 
+            last_name=last_name, 
+            genre=genre)
         user.set_password(password)
         user.save()
         return user
 
-    def create_superuser(self, ci, email, password=None):
-        user = self.create_user(ci,email, password)
+    def create_superuser(self, first_name, last_name, ci, email, genre, password=None):
+        if not ci:
+            raise ValueError('An ci is required.')
+        if not email:
+            raise ValueError('An email is required.')
+        if not password:
+            raise ValueError('A password is required.')
+        user = self.create_user(first_name, last_name, ci, email,genre, password)
         user.is_superuser = True
         user.save()
         return user
@@ -27,14 +38,14 @@ class AppUserManager(BaseUserManager):
 class User(AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
-    ci = models.CharField(max_length=8, primary_key=True,unique=True)
+    ci = models.CharField(max_length=8, primary_key=True, unique=True)
     email = models.EmailField(unique=True, max_length=50)
     genre = models.CharField(max_length=5)
     password = models.CharField(max_length=50)
     confirm_password = models.CharField(max_length=50)
 
     USERNAME_FIELD = 'ci'
-    REQUIRED_FIELDS = ['first_name','last_name','email','genre','password','confirm_password']
+    REQUIRED_FIELDS = ['first_name', 'last_name','email', 'genre', 'password']
     objects = AppUserManager()
 
     def __str__(self):

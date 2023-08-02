@@ -11,6 +11,11 @@ class uploadVideoSerializer(serializers.ModelSerializer):
         model = Video
         fields = '__all__'
 
+    def create(self, data_video):
+        video_obj = Video.objects.create(**data_video)
+        video_obj.save()
+        return video_obj
+
 
 class userRegisterSerializer(serializers.ModelSerializer):
     class Meta:
@@ -18,7 +23,13 @@ class userRegisterSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def create(self, clean_data):
-        user_obj = User.objects.create_user(first_name=clean_data['first_name'], last_name=clean_data['last_name'],ci=clean_data['ci'], email=clean_data['email'], password=clean_data['password'])
+        user_obj = User.objects.create_user(
+            first_name=clean_data['first_name'], 
+            last_name=clean_data['last_name'],
+            ci=clean_data['ci'], 
+            email=clean_data['email'], 
+            genre=clean_data['genre'],
+            password=clean_data['password'])
         user_obj.save()
         return user_obj
 
