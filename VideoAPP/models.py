@@ -4,7 +4,7 @@ from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 
 
 class AppUserManager(BaseUserManager):
-    def create_user(self, first_name, last_name, ci, email, genre, password=None):
+    def create_user(self, first_name, last_name, ci, email, genre, password=None,is_teacher=False):
         if not ci:
             raise ValueError('An ci is required.')
         if not email:
@@ -22,7 +22,7 @@ class AppUserManager(BaseUserManager):
         user.save()
         return user
 
-    def create_superuser(self, first_name, last_name, ci, email, genre, password=None):
+    def create_superuser(self, first_name, last_name, ci, email, genre, password=None,is_teacher=False):
         if not ci:
             raise ValueError('An ci is required.')
         if not email:
@@ -43,9 +43,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     genre = models.CharField(max_length=5)
     password = models.CharField(max_length=50)
     confirm_password = models.CharField(max_length=50)
+    is_teacher = models.BooleanField(default=False)
 
     USERNAME_FIELD = 'ci'
-    REQUIRED_FIELDS = ['first_name', 'last_name','email', 'genre', 'password']
+    REQUIRED_FIELDS = ['first_name', 'last_name','email', 'genre', 'password','is_teacher']
     objects = AppUserManager()
 
     def __str__(self):

@@ -29,7 +29,8 @@ class userRegisterSerializer(serializers.ModelSerializer):
             ci=clean_data['ci'], 
             email=clean_data['email'], 
             genre=clean_data['genre'],
-            password=clean_data['password'])
+            password=clean_data['password'],
+            is_teacher=clean_data['is_teacher'])
         user_obj.save()
         return user_obj
 
