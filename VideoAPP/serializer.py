@@ -6,16 +6,10 @@ from django.core.exceptions import ValidationError
 UserModel = get_user_model()
 
 
-class uploadVideoSerializer(serializers.ModelSerializer):
+class VideoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Video
-        fields = '__all__'
-
-    def create(self, data_video):
-        video_obj = Video.objects.create(**data_video)
-        video_obj.save()
-        return video_obj
-
+        fields = ('title','file_video','description')
 
 class userRegisterSerializer(serializers.ModelSerializer):
     class Meta:
@@ -29,11 +23,9 @@ class userRegisterSerializer(serializers.ModelSerializer):
             ci=clean_data['ci'], 
             email=clean_data['email'], 
             genre=clean_data['genre'],
-            password=clean_data['password'],
-            is_teacher=clean_data['is_teacher'])
+            password=clean_data['password'])
         user_obj.save()
         return user_obj
-
 
 class userLoginSerializer(serializers.Serializer):
 
@@ -47,7 +39,6 @@ class userLoginSerializer(serializers.Serializer):
             raise ValidationError(authenticate(
                 username=clean_data['ci'], password=clean_data['password']))
         return user
-
 
 class userSerializer(serializers.ModelSerializer):
     class Meta:
