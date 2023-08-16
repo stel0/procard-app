@@ -1,0 +1,3 @@
+Tener solo para crear administrador
+Hacer que un usuario tenga un campo "banned"=set_def(False)
+Crear un grupo para usuarios para cada empresa que adquiera el curso(averiguar)
