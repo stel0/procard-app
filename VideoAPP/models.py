@@ -2,9 +2,13 @@ from django.db import models
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 
+def normalize_first_name(first_name):
+    return first_name.lower()
+def normalize_last_name(last_name):
+    return last_name.lower()
 
 class AppUserManager(BaseUserManager):
-    def create_user(self, first_name, last_name, ci, email, genre, password=None):
+    def create_user(self, first_name, last_name, ci, email, genre, password=None,is_staff=False):
         if not first_name:
             raise ValueError('An first_name is required.')
         if not last_name:
@@ -18,12 +22,15 @@ class AppUserManager(BaseUserManager):
         if not genre:
             raise ValueError('A genre is required.')
         email = self.normalize_email(email)
+        first_name = normalize_first_name(first_name)
+        last_name = normalize_last_name(last_name)
         user = self.model(
             email=email,
             ci=ci,
             first_name=first_name,
             last_name=last_name,
-            genre=genre)
+            genre=genre,
+            is_staff=is_staff)
         user.set_password(password)
         user.save()
         return user
@@ -35,12 +42,9 @@ class AppUserManager(BaseUserManager):
         user.save()
         return user
 
-    def create_teacher(self, first_name, last_name, ci, email, genre, password=None):
-        user = self.create_user(first_name, last_name,
-                                ci, email, genre, password)
-        user.is_superuser = 0
-        user.save()
-        return user
+class Company(models.Model):
+    company_name = models.CharField(max_length=100)
+    
 
 class User(AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(max_length=50)
@@ -49,7 +53,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True, max_length=50)
     genre = models.CharField(max_length=5)
     password = models.CharField(max_length=50)
-    is_teacher = models.BooleanField(default=False)
+    is_staff = models.BooleanField(default=False)
+    is_banned = models.BooleanField(default=False)
+
+    company = models.ForeignKey(Company, on_delete=models.CASCADE)
 
     USERNAME_FIELD = 'ci'
     REQUIRED_FIELDS = ['first_name', 'last_name', 'email', 'genre', 'password']

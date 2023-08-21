@@ -5,7 +5,6 @@ from django.core.exceptions import ValidationError
 
 UserModel = get_user_model()
 
-
 class VideoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Video
@@ -23,10 +22,11 @@ class userRegisterSerializer(serializers.ModelSerializer):
             ci=clean_data['ci'], 
             email=clean_data['email'], 
             genre=clean_data['genre'],
-            password=clean_data['password'])
+            password=clean_data['password'],
+            is_staff=clean_data['is_staff'])
         user_obj.save()
         return user_obj
-
+    
 class userLoginSerializer(serializers.Serializer):
 
     password = serializers.CharField()

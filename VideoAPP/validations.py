@@ -43,13 +43,13 @@ def validate_email(data):
 def validate_identity_card(data):
     ci = data['ci'].strip()
     if not ci or len(ci) > 8:
-        raise ValidationError('Elije otro numero de cedula')
+        raise ValidationError('La contraseña o cedula es incorrecta')
     return True
 
 def validate_password(data):
     password = data['password'].strip()
     if not password:
-        raise ValidationError('Se necesita una contraseña')
+        raise ValidationError('La contraseña o cedula es incorrecta')
     return True
 
 
