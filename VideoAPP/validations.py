@@ -3,10 +3,13 @@ from django.contrib.auth import get_user_model
 import os
 UserModel = get_user_model()
 
+
+
 def custom_validation(data):
     email = data['email'].strip()
     ci = data['ci'].strip()
-    password = data['password'].strip()
+    password = data['password']
+    confirm_password = data['confirm_password']
     ##
     if not ci:
         raise ValidationError('Elije otro numero de cedula')
@@ -40,16 +43,14 @@ def validate_email(data):
         raise ValidationError('El correo es necesario')
     return True
 
-def validate_identity_card(data):
+
+def login_validation(data):
     ci = data['ci'].strip()
+    password = data['password'].strip()
     if not ci or len(ci) > 8:
         raise ValidationError('La contraseña o cedula es incorrecta')
-    return True
-
-def validate_password(data):
-    password = data['password'].strip()
     if not password:
-        raise ValidationError('La contraseña o cedula es incorrecta')
+        raise ValidationError('La contraseña o cedula es incorrecta')    
     return True
 
 
