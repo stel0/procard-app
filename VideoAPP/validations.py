@@ -45,12 +45,12 @@ def validate_email(data):
 
 
 def login_validation(data):
-    ci = data['ci'].strip()
-    password = data['password'].strip()
+    ci = data['ci']
+    password = data['password']
     if not ci or len(ci) > 8:
         raise ValidationError('La contraseña o cedula es incorrecta')
     if not password:
         raise ValidationError('La contraseña o cedula es incorrecta')    
-    return True
+    return {'ci':ci,'password':password}
 
 

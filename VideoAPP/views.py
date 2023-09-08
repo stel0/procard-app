@@ -6,16 +6,17 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import permissions, status
 
-from .serializer import UserRegisterSerializer, UserLoginSerializer, UserSerializer, VideoSerializer,SetNewPasswordSerializer,ResetPasswordEmailRequestSerializer
+from .serializer import UserRegisterSerializer, UserLoginSerializer, UserSerializer, VideoSerializer
 from .validations import custom_validation, login_validation
-from .customPermissions import isAdminUser,isResetPasswordUser
+from .customPermissions import isAdmin
 
 
 
 """USUARIO METODOS"""
 
 class registerUser(APIView):
-    permission_classes =[isAdminUser]
+    permission_classes =[permissions.IsAdminUser | isAdmin]
+    authentication_classes = [SessionAuthentication]
 
     def post(self, request):
         clean_data = custom_validation(request.data)
@@ -24,7 +25,7 @@ class registerUser(APIView):
             user = serializer.create(clean_data)
             if user:
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class loginUser(APIView):
     permission_classes = [permissions.AllowAny]
@@ -35,7 +36,7 @@ class loginUser(APIView):
         clean_data = login_validation(request.data)
         serializer = UserLoginSerializer(data=clean_data)
         if serializer.is_valid(raise_exception=True):
-            user = serializer.check_user(serializer.data)
+            user = serializer.check_user(clean_data)
             login(request, user)
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
@@ -50,45 +51,52 @@ class logoutUser(APIView):
         return Response(status=status.HTTP_200_OK)
 
 class deleteUser(APIView):
-    permission_classes = [isAdminUser]
-    authentication_classes = (SessionAuthentication,)
+    permission_classes = [permissions.IsAdminUser]
+    authentication_classes = [SessionAuthentication]
 
-    def delete(self,request,pk):
-        user = User.objects.get(pk=pk)
+
+    def delete(self,request):
+        user = User.objects.get(pk=request.data['ci'])
+        if(user == request.user):
+            user.delete()
+            logout(request)
+            return Response("Logout",status=status.HTTP_200_OK)
         user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-class sendResetPasswordEmail(APIView):
-    permission_classes = [permissions.AllowAny]
+# class sendResetPasswordEmail(APIView):
+#     permission_classes = [permissions.AllowAny]
 
-    def post(self, request):    
-        data = request.data
-        serializer = ResetPasswordEmailRequestSerializer(data=data)
-        if serializer.is_valid(raise_exception=True):
-            try:
-                user = serializer.validate(data)
-                if user:
-                    return Response({'message':'Cambiar contraseña concedido'}, status=status.HTTP_200_OK)
-                else:
-                    return Response({'message':'El correo no existe'}, status=status.HTTP_404_NOT_FOUND)
-            except Exception:
-                return Response({'message':'No es posible pedir cambio de contraseña'}, status=status.HTTP_400_BAD_REQUEST)
+#     def post(self, request):    
+#         data = request.data
+#         serializer = ResetPasswordEmailRequestSerializer(data=data)
+#         if serializer.is_valid(raise_exception=True):
+#             try:
+#                 user = serializer.validate(data)
+#                 if user:
+#                     return Response({'message':'Cambiar contraseña concedido'}, status=status.HTTP_200_OK)
+#                 else:
+#                     return Response({'message':'El correo no existe'}, status=status.HTTP_404_NOT_FOUND)
+#             except Exception:
+#                 return Response({'message':'No es posible pedir cambio de contraseña'}, status=status.HTTP_400_BAD_REQUEST)
 
-class changePassword(APIView):
-    permission_classes = [isResetPasswordUser]
+# class changePassword(APIView):
+#     permission_classes = [isResetPasswordUser]
 
-    def post(self,request):
-        data = request.data
-        serializer = SetNewPasswordSerializer(data=data)
-        if serializer.is_valid(raise_exception=True):
-            user = serializer.change()
-            if user:
-                return Response({'message':'Contraseña cambiada'}, status=status.HTTP_200_OK)
-        return Response({'message':'Contraseña no cambiada, intente de nuevo'}, status=status.HTTP_400_BAD_REQUEST)
+#     def post(self,request):
+#         data = request.data
+#         serializer = SetNewPasswordSerializer(data=data)
+#         if serializer.is_valid(raise_exception=True):
+#             user = serializer.change()
+#             if user:
+#                 return Response({'message':'Contraseña cambiada'}, status=status.HTTP_200_OK)
+#         return Response({'message':'Contraseña no cambiada, intente de nuevo'}, status=status.HTTP_400_BAD_REQUEST)
     
 ##Obtener todos los usuarios
 class getUsers(APIView):
-    permission_classes = [isAdminUser]
+    permission_classes = [permissions.IsAdminUser | isAdmin]
+    authentication_classes = [SessionAuthentication]
+
 
     def get(self,request):
         usernames = [{"user":f"{user.first_name} {user.last_name} - {user.ci}"}  for user in User.objects.all()]
@@ -97,7 +105,7 @@ class getUsers(APIView):
 ##Informacion del usuario logeado
 class userView(APIView):
     permission_classes = [permissions.IsAuthenticated]
-    authentication_classes = (SessionAuthentication,)
+    authentication_classes = [SessionAuthentication]
     ##
 
     def get(self, request):
@@ -112,7 +120,7 @@ class userView(APIView):
 
 ##Obtener todos los videos
 class videosView(APIView):
-    permission_classes = (permissions.IsAuthenticated,isAdminUser)
+    permission_classes = [permissions.IsAdminUser | isAdmin]
 
     def get(self, request):
         videos = Video.objects.all()
@@ -121,7 +129,7 @@ class videosView(APIView):
 
 ##Subir un video
 class uploadVideo(APIView):
-    permission_classes = [isAdminUser]
+    permission_classes = [permissions.IsAdminUser | isAdmin]
 
     def post(self, request, *args, **kwargs):
         serializer = VideoSerializer(data=request.data)
@@ -132,7 +140,9 @@ class uploadVideo(APIView):
 
 ##Eliminar un video
 class deleteVideo(APIView):
-    def delete(self, request, pk):
-        video = Video.objects.get(pk=pk)
+    permission_classes = [permissions.IsAdminUser | isAdmin]
+
+    def delete(self, request):
+        video = Video.objects.get(pk=request.data['id'])
         video.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)

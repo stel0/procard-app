@@ -1,8 +1,10 @@
 from rest_framework import permissions
 
-class isAdminUser(permissions.BasePermission):
+class isAdmin(permissions.BasePermission):
     def has_permission(self, request, view):
-        return request.user.is_superuser
+        if(hasattr(request.user, 'role')):
+            return request.user.role == 1
+        return 0
 
 class isBannedUser(permissions.BasePermission):
     def has_permission(self, request, view):
