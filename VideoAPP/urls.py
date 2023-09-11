@@ -6,6 +6,12 @@ urlpatterns = [
     # path("api/v1/",include(router.urls)),
     path("docs/",include_docs_urls(title="Video API")),
     
+    # Groups
+    path("createGroup/",views.createGroup.as_view()),
+    path("deleteGroup/",views.deleteGroup.as_view()),
+    path("addUserToGroup/",views.addUserToGroup.as_view()),
+    path("deleteUserFromGroup/",views.deleteUserFromGroup.as_view()),
+
     # User
     path("login/",views.loginUser.as_view()),
     path("register/",views.registerUser.as_view()),
