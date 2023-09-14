@@ -17,71 +17,123 @@ from .customPermissions import isAdmin
 
 """GRUPOS METODOS"""
 
-class createGroup(APIView):
+class CreateGroup(APIView):
     permission_classes = [permissions.IsAdminUser]
     authentication_classes = [SessionAuthentication]
     def post(self,request):
-
-        group = group_validation(request.data)
-        newGroup = Group.objects.create(name=group)
-
+        # Use get because the program waits for an key group name
+        group = group_validation(request.data.get('group'))            
         try:
+            newGroup = Group.objects.create(name=group)
             newGroup.save()
             return Response(status=status.HTTP_201_CREATED)
-        except:
-            return Response(newGroup,status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'error':str(e)},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
-class deleteGroup(APIView):
+class DeleteGroup(APIView):
     permission_classes = [permissions.IsAdminUser]
     authentication_classes = [SessionAuthentication]
 
     def delete(self,request):
-        group = Group.objects.get(name=request.data['group'])
 
         try:
+            group = Group.objects.get(name=request.data.get('group'))
             group.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
-        except:
-            return Response(group,status=status.HTTP_404_NOT_FOUND)
+        except Group.DoesNotExist:
+            return Response({'error':'Group does not exists'},status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'error':str(e)},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class DisableGroup(APIView):
+    permission_classes = [permissions.IsAdminUser]
+    authentication_classes = [SessionAuthentication]
+
+    def put(self, request):
+        try:
+            group_id = request.data.get('group')  # id of the group
+            group = Group.objects.get(pk=group_id) # search for the group
+
+            # search all the user in the group, if the user exists then ban him
+            users_in_group = User.objects.filter(groups=group)
+            for user in users_in_group:
+                user.is_banned = True
+                user.save()
+
+            return Response(status=status.HTTP_200_OK)
+        except Group.DoesNotExist:
+            return Response({'error': 'El grupo no existe.'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
-class addUserToGroup(APIView):
+class EnableGroup(APIView):
+    permissions_classes = [permissions.IsAdminUser]
+    authentication_classes = [SessionAuthentication]
+
+    def put(self,request):
+        try:
+            group_id = request.data.get('group') # id of the group
+            group = Group.objects.get(pk = group_id) # search for the group
+
+            # search all the user in the group, if the user exists then unban him
+            users_in_group = User.objects.filter(groups=group)
+            for user in users_in_group:
+                user.is_banned = False
+                user.save()
+
+            return Response(status=status.HTTP_200_OK)
+        except Group.DoesNotExist:
+            return Response({"error":"El grupo no existe."},status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'error':str(e)},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
+        
+class AddUserToGroup(APIView):
     permission_classes = [permissions.IsAdminUser]
     authentication_classes = [SessionAuthentication]
 
     def post(self,request):
-        user = User.objects.get(pk=request.data['ci'])
-        group = Group.objects.get(pk=request.data['group'])
-        if user.groups.filter(name=group).exists():
-            return Response("User is already in the group",status=status.HTTP_400_BAD_REQUEST)
-        if user.groups.count() == 0:
-            try:
+        try:
+            user = User.objects.get(pk=request.data.get('ci'))
+            group = Group.objects.get(pk=request.data.get('group'))
+            if user.groups.filter(name=group).exists():
+                return Response("User is already in the group",status=status.HTTP_400_BAD_REQUEST)
+            if user.groups.count() == 0:
                 user.groups.add(group)
                 return Response(status=status.HTTP_201_CREATED)
-            except:
-                return Response(status=status.HTTP_404_NOT_FOUND)
-        else:
-            return Response("User can only be added to one group",status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response("User can only be added to one group",status=status.HTTP_400_BAD_REQUEST)
+        except User.DoesNotExist:
+            return Response({"error":"El usuario no existe"},status=status.HTTP_404_NOT_FOUND)
+        except Group.DoesNotExist:
+            return Response({"error":"El grupo no existe."},status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error":str(e)},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-class deleteUserFromGroup(APIView):
+class DeleteUserFromGroup(APIView):
     permission_classes = [permissions.IsAdminUser]
     authentication_classes = [SessionAuthentication]
 
     def delete(self,request):
-        user = User.objects.get(pk=request.data['ci'])
-        group = Group.objects.get(pk=request.data['group'])
+        try:
+            user = User.objects.get(pk=request.data.get('ci'))
+            group = Group.objects.get(pk=request.data.get('group'))
 
-        if user.groups.filter(name=group).exists():
-            try:
+            if user.groups.filter(name=group).exists():
                 user.groups.remove(group)
                 return Response("User removed from the group",status=status.HTTP_204_NO_CONTENT)
-            except:
-                return Response(status=status.HTTP_404_NOT_FOUND)
-        else:
-            return Response("User is not in this group",status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response("User is not in this group",status=status.HTTP_400_BAD_REQUEST)
+        except User.DoesNotExist:
+            return Response({"error":"El usuario no existe"},status=status.HTTP_404_NOT_FOUND)
+        except Group.DoesNotExist:
+            return Response({"error":"El grupo no existe."},status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'error':str(e)},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 """USUARIO METODOS"""
 
-class registerUser(APIView):
+class RegisterUser(APIView):
     permission_classes =[permissions.IsAdminUser | isAdmin]
     authentication_classes = [SessionAuthentication]
 
@@ -94,10 +146,23 @@ class registerUser(APIView):
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class loginUser(APIView):
+class DeleteUser(APIView):
+    permission_classes = [permissions.IsAdminUser]
+    authentication_classes = [SessionAuthentication]
+
+    def delete(self,request):
+        try:
+            user = User.objects.get(pk=request.data.get('ci'))
+            user.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except user.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'error':str(e)},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class LoginUser(APIView):
     permission_classes = [permissions.AllowAny]
     authentication_classes = [SessionAuthentication]
-    ##
 
     def post(self, request):
         clean_data = login_validation(request.data)
@@ -109,7 +174,7 @@ class loginUser(APIView):
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
-class logoutUser(APIView):
+class LogoutUser(APIView):
     permission_classes = [permissions.AllowAny]
     authentication_classes = ()
 
@@ -117,76 +182,37 @@ class logoutUser(APIView):
         logout(request)
         return Response(status=status.HTTP_200_OK)
 
-class deleteUser(APIView):
-    permission_classes = [permissions.IsAdminUser]
-    authentication_classes = [SessionAuthentication]
-
-
-    def delete(self,request):
-        user = User.objects.get(pk=request.data['ci'])
-        if(user == request.user):
-            user.delete()
-            logout(request)
-            return Response("Logout",status=status.HTTP_200_OK)
-        user.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-# class sendResetPasswordEmail(APIView):
-#     permission_classes = [permissions.AllowAny]
-
-#     def post(self, request):    
-#         data = request.data
-#         serializer = ResetPasswordEmailRequestSerializer(data=data)
-#         if serializer.is_valid(raise_exception=True):
-#             try:
-#                 user = serializer.validate(data)
-#                 if user:
-#                     return Response({'message':'Cambiar contraseña concedido'}, status=status.HTTP_200_OK)
-#                 else:
-#                     return Response({'message':'El correo no existe'}, status=status.HTTP_404_NOT_FOUND)
-#             except Exception:
-#                 return Response({'message':'No es posible pedir cambio de contraseña'}, status=status.HTTP_400_BAD_REQUEST)
-
-# class changePassword(APIView):
-#     permission_classes = [isResetPasswordUser]
-
-#     def post(self,request):
-#         data = request.data
-#         serializer = SetNewPasswordSerializer(data=data)
-#         if serializer.is_valid(raise_exception=True):
-#             user = serializer.change()
-#             if user:
-#                 return Response({'message':'Contraseña cambiada'}, status=status.HTTP_200_OK)
-#         return Response({'message':'Contraseña no cambiada, intente de nuevo'}, status=status.HTTP_400_BAD_REQUEST)
-    
-##Obtener todos los usuarios
-class getUsers(APIView):
+class GetUsers(APIView):
     permission_classes = [permissions.IsAdminUser | isAdmin]
     authentication_classes = [SessionAuthentication]
 
-
     def get(self,request):
-        usernames = [{"user":f"{user.first_name} {user.last_name} - {user.ci}"}  for user in User.objects.all()]
+        usernames = []
+        for user in User.objects.all():
+            usernames.append({'ci':user.ci,
+                              'first_name':user.first_name,
+                              'last_name':user.last_name,
+                              'Company': user.groups.first().name if user.groups.exists() else 0,
+                              'is_banned':user.is_banned})
         return Response(usernames)
 
-##Informacion del usuario logeado
-class userView(APIView):
+class GetUser(APIView):
     permission_classes = [permissions.IsAuthenticated]
     authentication_classes = [SessionAuthentication]
-    ##
 
     def get(self, request):
         try:
             serializer = UserSerializer(request.user)
-            return Response({'first_name': serializer.data['first_name'],
-                        'last_name': serializer.data['last_name'],}, status=status.HTTP_200_OK)
+            return Response({
+                        'first_name': serializer.data['first_name'],
+                        'last_name': serializer.data['last_name'],
+                        'Company':Group.objects.get(pk=serializer.data['groups'][0]).name}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
 """VIDEOS METODOS"""
 
-##Obtener todos los videos
-class videosView(APIView):
+class GetVideos(APIView):
     permission_classes = [permissions.IsAdminUser | isAdmin]
 
     def get(self, request):
@@ -194,8 +220,7 @@ class videosView(APIView):
         serializer = VideoSerializer(videos, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-##Subir un video
-class uploadVideo(APIView):
+class UploadVideo(APIView):
     permission_classes = [permissions.IsAdminUser | isAdmin]
 
     def post(self, request, *args, **kwargs):
@@ -205,11 +230,15 @@ class uploadVideo(APIView):
             return Response(serializer.data)
         return Response(serializer.errors)
 
-##Eliminar un video
-class deleteVideo(APIView):
+class DeleteVideo(APIView):
     permission_classes = [permissions.IsAdminUser | isAdmin]
 
     def delete(self, request):
-        video = Video.objects.get(pk=request.data['id'])
-        video.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        try:
+            video = Video.objects.get(pk=request.data.get('id'))
+            video.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Video.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'error':str(e)},status=status.HTTP_500_INTERNAL_SERVER_ERROR)

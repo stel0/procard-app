@@ -7,21 +7,23 @@ urlpatterns = [
     path("docs/",include_docs_urls(title="Video API")),
     
     # Groups
-    path("createGroup/",views.createGroup.as_view()),
-    path("deleteGroup/",views.deleteGroup.as_view()),
-    path("addUserToGroup/",views.addUserToGroup.as_view()),
-    path("deleteUserFromGroup/",views.deleteUserFromGroup.as_view()),
+    path("createGroup/",views.CreateGroup.as_view()),
+    path("deleteGroup/",views.DeleteGroup.as_view()),
+    path("addUserToGroup/",views.AddUserToGroup.as_view()),
+    path("deleteUserFromGroup/",views.DeleteUserFromGroup.as_view()),
+    path("disableGroup/",views.DisableGroup.as_view()),
+    path("enableGroup/",views.EnableGroup.as_view()),
 
     # User
-    path("login/",views.loginUser.as_view()),
-    path("register/",views.registerUser.as_view()),
-    path("logout/",views.logoutUser.as_view()),
-    path("user/",views.userView.as_view()),
-    path("deleteUser/",views.deleteUser.as_view()),
-    path("get_all_users/",views.getUsers.as_view()),
+    path("login/",views.LoginUser.as_view()),
+    path("register/",views.RegisterUser.as_view()),
+    path("logout/",views.LogoutUser.as_view()),
+    path("user/",views.GetUser.as_view()),
+    path("deleteUser/",views.DeleteUser.as_view()),
+    path("get_all_users/",views.GetUsers.as_view()),
     
     # Video
-    path("upload_video/",views.uploadVideo.as_view()),
-    path("all_videos/",views.videosView.as_view()),
-    path("deleteVideo/",views.deleteVideo.as_view()),
+    path("upload_video/",views.UploadVideo.as_view()),
+    path("all_videos/",views.GetVideos.as_view()),
+    path("deleteVideo/",views.DeleteVideo.as_view()),
 ] 

@@ -3,23 +3,23 @@ from django.contrib.auth import get_user_model
 import re
 import os
 UserModel = get_user_model()
-group_pattern = r"^[a-zA-Z0-9 ]+$"
+group_pattern = r'^[a-zA-Z0-9]+$'
 password_pattern = r"^[a-zA-Z0-9!@#$%^&*()-_+=<>?]+$"
 
 
 def group_validation(data):
-    group = data['group']
-    if not re.match(group, group_pattern):
-        raise ValidationError('El grupo es necesario')
+    group = data.get('group') 
     if not group:
         raise ValidationError('El grupo es necesario')
+    if not re.match(group_pattern, group):
+        raise ValidationError('El grupo solo debe contener letras y números')
     return group
 
 
 def custom_validation(data):
-    email = data['email'].strip()
-    ci = data['ci'].strip()
-    password = data['password']
+    email = data.get('email').strip()
+    ci = data.get('ci').strip()
+    password = data.get('password')
     if not ci:
         raise ValidationError('Elije otro numero de cedula')
     if not email or UserModel.objects.filter(email=email).exists():
@@ -30,9 +30,9 @@ def custom_validation(data):
 
 
 def custom_validation_video(data):
-    title = data['title']
-    file = data['file_video']
-    description = data['description']
+    title = data.get('title')
+    file = data.get('file_video')
+    description = data.get('description')
     file_type = os.path.splitext(file)
     if file_type != ".mp4":
         raise ValidationError('El archivo debe ser .mp4')
@@ -46,8 +46,8 @@ def custom_validation_video(data):
 
 
 def login_validation(data):
-    ci = data['ci']
-    password = data['password']
+    ci = data.get('ci')
+    password = data.get('password')
     if not ci or len(ci) > 8:
         raise ValidationError('La contraseña o cedula es incorrecta')
     if not password:
