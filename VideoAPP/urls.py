@@ -13,6 +13,7 @@ urlpatterns = [
     path("deleteUserFromGroup/",views.DeleteUserFromGroup.as_view()),
     path("disableGroup/",views.DisableGroup.as_view()),
     path("enableGroup/",views.EnableGroup.as_view()),
+    path("get_all_groups/",views.GetGroups.as_view()),
 
     # User
     path("login/",views.LoginUser.as_view()),
@@ -24,6 +25,7 @@ urlpatterns = [
     
     # Video
     path("upload_video/",views.UploadVideo.as_view()),
-    path("all_videos/",views.GetVideos.as_view()),
+    path("get_all_videos/",views.GetVideos.as_view()),
     path("deleteVideo/",views.DeleteVideo.as_view()),
+    path("editVideo/",views.EditVideo.as_view()),
 ] 

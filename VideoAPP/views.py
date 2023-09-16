@@ -1,3 +1,5 @@
+import os
+
 # Rest Framework
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.views import APIView
@@ -7,22 +9,22 @@ from rest_framework import permissions, status
 #Django
 from django.contrib.auth import login, logout
 from django.contrib.auth.models import Group
-from django.core.exceptions import ValidationError
+from django.conf import settings
 
 #Custom
 from .models import Video, User
 from .serializer import UserRegisterSerializer, UserLoginSerializer, UserSerializer, VideoSerializer
-from .validations import custom_validation, login_validation,group_validation
+from .validations import custom_validation, login_validation,group_validation,video_validation
 from .customPermissions import isAdmin
 
 """GRUPOS METODOS"""
 
 class CreateGroup(APIView):
-    permission_classes = [permissions.IsAdminUser]
+    permission_classes = [permissions.IsAdminUser | isAdmin]
     authentication_classes = [SessionAuthentication]
     def post(self,request):
         # Use get because the program waits for an key group name
-        group = group_validation(request.data.get('group'))            
+        group = group_validation(request.data['group'])            
         try:
             newGroup = Group.objects.create(name=group)
             newGroup.save()
@@ -31,7 +33,7 @@ class CreateGroup(APIView):
             return Response({'error':str(e)},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
 class DeleteGroup(APIView):
-    permission_classes = [permissions.IsAdminUser]
+    permission_classes = [permissions.IsAdminUser | isAdmin] 
     authentication_classes = [SessionAuthentication]
 
     def delete(self,request):
@@ -46,7 +48,7 @@ class DeleteGroup(APIView):
             return Response({'error':str(e)},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class DisableGroup(APIView):
-    permission_classes = [permissions.IsAdminUser]
+    permission_classes = [permissions.IsAdminUser | isAdmin]
     authentication_classes = [SessionAuthentication]
 
     def put(self, request):
@@ -67,7 +69,7 @@ class DisableGroup(APIView):
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
 class EnableGroup(APIView):
-    permissions_classes = [permissions.IsAdminUser]
+    permission_classes = [permissions.IsAdminUser | isAdmin]
     authentication_classes = [SessionAuthentication]
 
     def put(self,request):
@@ -87,7 +89,18 @@ class EnableGroup(APIView):
         except Exception as e:
             return Response({'error':str(e)},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             
-        
+class GetGroups(APIView):
+    permission_classes = [permissions.IsAdminUser | isAdmin]
+    authentication_classes = [SessionAuthentication]
+
+    def get(self,request):
+        groups = []
+        for group in Group.objects.all():
+            groups.append({
+                'id':group.id,
+                'Company':group.name})
+        return Response(groups,status=status.HTTP_200_OK)
+    
 class AddUserToGroup(APIView):
     permission_classes = [permissions.IsAdminUser]
     authentication_classes = [SessionAuthentication]
@@ -213,7 +226,8 @@ class GetUser(APIView):
 """VIDEOS METODOS"""
 
 class GetVideos(APIView):
-    permission_classes = [permissions.IsAdminUser | isAdmin]
+    permission_classes = []
+    authentication_classes = [SessionAuthentication]
 
     def get(self, request):
         videos = Video.objects.all()
@@ -223,12 +237,15 @@ class GetVideos(APIView):
 class UploadVideo(APIView):
     permission_classes = [permissions.IsAdminUser | isAdmin]
 
-    def post(self, request, *args, **kwargs):
-        serializer = VideoSerializer(data=request.data)
+    def post(self, request):
+        clean_data = video_validation(request.data)
+        serializer = VideoSerializer(data=clean_data)
         if serializer.is_valid(raise_exception=True):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors)
+
+            
 
 class DeleteVideo(APIView):
     permission_classes = [permissions.IsAdminUser | isAdmin]
@@ -236,9 +253,46 @@ class DeleteVideo(APIView):
     def delete(self, request):
         try:
             video = Video.objects.get(pk=request.data.get('id'))
+            file_path = os.path.join(settings.MEDIA_ROOT, str(video.file_video))            
+            if os.path.exists(file_path):
+                os.remove(file_path)
             video.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Video.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({'error':str(e)},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class EditVideo(APIView):
+    permission_classes = [permissions.IsAdminUser | isAdmin]
+
+    def put(self,request):
+        try:
+            video = Video.objects.get(pk=request.data.get('id'))
+            video.title = request.data['title']
+            video.description = request.data['description']
+            file_path = os.path.join(settings.MEDIA_ROOT, str(video.file_video))
+
+            if os.path.exists(file_path):
+                os.remove(file_path)
+
+            replace_file = request.FILES.get("file_video")
+            if replace_file:
+                video.file_video = replace_file
+
+            video.save()
+            return Response({'title':video.title,'description':video.description},status=status.HTTP_200_OK)
+        except Video.DoesNotExist:
+            return Response({"error":"The video does not exists"},status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error",str(e)},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        # try:
+        #     video = Video.objects.get(pk=request.data.get('id'))
+        #     serializer = VideoSerializer(data = video)
+        #     if serializer.is_valid(raise_exception=True):
+        #         serializer.save()
+        #         return Response(serializer,status=status.HTTP_200_OK)
+        # except Video.DoesNotExist:
+        #     return Response({'error':'The video not exists'},status=status.HTTP_404_NOT_FOUND)
+        # except Exception as e:
+        #     return Response({'error':str(e)},status=status.HTTP_500_INTERNAL_SERVER_ERROR)

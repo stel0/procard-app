@@ -3,16 +3,16 @@ from django.contrib.auth import get_user_model
 import re
 import os
 UserModel = get_user_model()
-group_pattern = r'^[a-zA-Z0-9]+$'
+group_pattern = r'^[a-zA-Z0-9 ]+$'
 password_pattern = r"^[a-zA-Z0-9!@#$%^&*()-_+=<>?]+$"
 
 
 def group_validation(data):
-    group = data.get('group') 
+    group = data 
     if not group:
         raise ValidationError('El grupo es necesario')
     if not re.match(group_pattern, group):
-        raise ValidationError('El grupo solo debe contener letras y números')
+        raise ValidationError('El grupo solo debe contener letras y númerosdasa')
     return group
 
 
@@ -29,12 +29,15 @@ def custom_validation(data):
     return data
 
 
-def custom_validation_video(data):
-    title = data.get('title')
-    file = data.get('file_video')
-    description = data.get('description')
-    file_type = os.path.splitext(file)
-    if file_type != ".mp4":
+def video_validation(data):
+    title = data['title']
+    file = data['file_video']
+    description = data['description']
+    extensiones_video = ['.mp4', '.avi', '.mkv', '.mov', '.wmv', '.flv']
+    print(vars(file))
+    file_type = os.path.splitext(file.name)[1]
+    print(file_type)
+    if file_type.lower() not in extensiones_video:
         raise ValidationError('El archivo debe ser .mp4')
     if not title:
         raise ValidationError('El titulo es necesario')
@@ -43,6 +46,7 @@ def custom_validation_video(data):
     if not description:
         raise ValidationError('La descripcion es necesario')
     return data
+    pass
 
 
 def login_validation(data):
