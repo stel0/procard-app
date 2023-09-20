@@ -12,7 +12,7 @@ def group_validation(data):
     if not group:
         raise ValidationError('El grupo es necesario')
     if not re.match(group_pattern, group):
-        raise ValidationError('El grupo solo debe contener letras y númerosdasa')
+        raise ValidationError('El grupo solo debe contener letras y números')
     return group
 
 

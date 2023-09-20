@@ -9,6 +9,7 @@ urlpatterns = [
     # Groups
     path("createGroup/",views.CreateGroup.as_view()),
     path("deleteGroup/",views.DeleteGroup.as_view()),
+    path("editGroup/",views.EditGroup.as_view()),
     path("addUserToGroup/",views.AddUserToGroup.as_view()),
     path("deleteUserFromGroup/",views.DeleteUserFromGroup.as_view()),
     path("disableGroup/",views.DisableGroup.as_view()),

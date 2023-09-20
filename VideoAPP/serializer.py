@@ -50,9 +50,11 @@ class UserSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 """
-Creo que esto no deberia de ir en el serializer ya que no es una funcion que tenga que ver con el serializador.
-Deberia de devolver la informacion del usuario que quiere cambiarse la contrasena, solo cuando el usuario verifique en su correo
-el link de cambio de contraseña, una vez pasase la validacion de cambio de contraseña, el usuario podra cambiar su contrasena
+
+    Creo que esto no deberia de ir en el serializer ya que no es una funcion que tenga que ver con el serializador.
+    Deberia de devolver la informacion del usuario que quiere cambiarse la contrasena, solo cuando el usuario verifique en su correo
+    el link de cambio de contraseña, una vez pasase la validacion de cambio de contraseña, el usuario podra cambiar su contrasena
+
 """
 
 """Deberia de crear un view que devuelva la informacion del usuario que quiere cambiar la contrasena"""

@@ -1,4 +1,6 @@
 import os
+import re
+
 
 # Rest Framework
 from rest_framework.authentication import SessionAuthentication
@@ -6,15 +8,18 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import permissions, status
 
+
 #Django
 from django.contrib.auth import login, logout
 from django.contrib.auth.models import Group
 from django.conf import settings
+from django.core.exceptions import ValidationError
+
 
 #Custom
 from .models import Video, User
 from .serializer import UserRegisterSerializer, UserLoginSerializer, UserSerializer, VideoSerializer
-from .validations import custom_validation, login_validation,group_validation,video_validation
+from .validations import custom_validation, login_validation,group_validation,video_validation,group_pattern
 from .customPermissions import isAdmin
 
 """GRUPOS METODOS"""
@@ -23,15 +28,18 @@ class CreateGroup(APIView):
     permission_classes = [permissions.IsAdminUser | isAdmin]
     authentication_classes = [SessionAuthentication]
     def post(self,request):
-        # Use get because the program waits for an key group name
-        group = group_validation(request.data['group'])            
+        group = group_validation(request.data.get('group'))            
         try:
+            groups = Group.objects.all()
+            for g in groups:
+                if group == g.name:
+                    return Response({"error":"Group name already exists"},status=status.HTTP_302_FOUND)
             newGroup = Group.objects.create(name=group)
             newGroup.save()
             return Response(status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({'error':str(e)},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
+
 class DeleteGroup(APIView):
     permission_classes = [permissions.IsAdminUser | isAdmin] 
     authentication_classes = [SessionAuthentication]
@@ -44,6 +52,27 @@ class DeleteGroup(APIView):
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Group.DoesNotExist:
             return Response({'error':'Group does not exists'},status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'error':str(e)},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class EnableGroup(APIView):
+    permission_classes = [permissions.IsAdminUser | isAdmin]
+    authentication_classes = [SessionAuthentication]
+
+    def put(self,request):
+        try:
+            group_id = request.data.get('group') # id of the group
+            group = Group.objects.get(pk = group_id) # search for the group
+
+            # search all the user in the group, if the user exists then unban him
+            users_in_group = User.objects.filter(groups=group)
+            for user in users_in_group:
+                user.is_banned = False
+                user.save()
+
+            return Response(status=status.HTTP_200_OK)
+        except Group.DoesNotExist:
+            return Response({"error":"El grupo no existe."},status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({'error':str(e)},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -67,40 +96,7 @@ class DisableGroup(APIView):
             return Response({'error': 'El grupo no existe.'}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
-class EnableGroup(APIView):
-    permission_classes = [permissions.IsAdminUser | isAdmin]
-    authentication_classes = [SessionAuthentication]
 
-    def put(self,request):
-        try:
-            group_id = request.data.get('group') # id of the group
-            group = Group.objects.get(pk = group_id) # search for the group
-
-            # search all the user in the group, if the user exists then unban him
-            users_in_group = User.objects.filter(groups=group)
-            for user in users_in_group:
-                user.is_banned = False
-                user.save()
-
-            return Response(status=status.HTTP_200_OK)
-        except Group.DoesNotExist:
-            return Response({"error":"El grupo no existe."},status=status.HTTP_404_NOT_FOUND)
-        except Exception as e:
-            return Response({'error':str(e)},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            
-class GetGroups(APIView):
-    permission_classes = [permissions.IsAdminUser | isAdmin]
-    authentication_classes = [SessionAuthentication]
-
-    def get(self,request):
-        groups = []
-        for group in Group.objects.all():
-            groups.append({
-                'id':group.id,
-                'Company':group.name})
-        return Response(groups,status=status.HTTP_200_OK)
-    
 class AddUserToGroup(APIView):
     permission_classes = [permissions.IsAdminUser]
     authentication_classes = [SessionAuthentication]
@@ -143,6 +139,47 @@ class DeleteUserFromGroup(APIView):
             return Response({"error":"El grupo no existe."},status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({'error':str(e)},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class GetGroups(APIView):
+    permission_classes = [permissions.IsAdminUser | isAdmin]
+    authentication_classes = [SessionAuthentication]
+
+    def get(self,request):
+        groups = []
+        for group in Group.objects.all():
+            groups.append({
+                'id':group.id,
+                'Company':group.name})
+        return Response(groups,status=status.HTTP_200_OK)
+
+class EditGroup(APIView):
+    permission_classes = [permissions.IsAdminUser | isAdmin]
+    authentication_classes = [SessionAuthentication]
+
+    def put(self, request):
+        try:
+
+            group_id = request.data.get('group_id')  # Assuming you pass the group's ID in the request data.
+
+            new_group_name = request.data.get('new_name')  # Assuming you pass the new group name in the request data.
+
+            if not re.match(group_pattern, new_group_name):
+                raise ValidationError('El grupo solo debe contener letras y números')
+            
+            groups = Group.objects.all()
+            for g in groups:
+                if new_group_name == g.name:
+                    return Response({'error':'Group name already exists'},status=status.HTTP_302_FOUND)
+
+            group = Group.objects.get(pk=group_id)  # Retrieve the group.
+            group.name = new_group_name  # Modify the group's name.
+            group.save()  # Save the changes.
+            return Response(status=status.HTTP_200_OK)
+        
+        except Group.DoesNotExist:
+            return Response({'error': "Group not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 """USUARIO METODOS"""
 
@@ -243,9 +280,7 @@ class UploadVideo(APIView):
         if serializer.is_valid(raise_exception=True):
             serializer.save()
             return Response(serializer.data)
-        return Response(serializer.errors)
-
-            
+        return Response(serializer.errors)            
 
 class DeleteVideo(APIView):
     permission_classes = [permissions.IsAdminUser | isAdmin]
