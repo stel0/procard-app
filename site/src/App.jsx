@@ -15,7 +15,7 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Navigate to={PublicRoutes.LOGIN} />} />
+        {/* <Route path="/" element={<Navigate to={PublicRoutes.LOGIN} />} />
         <Route path={PublicRoutes.LOGIN} element={<Login />} />
         <Route
           path={PrivateRoutes.CREATE_ACCOUNT}
@@ -26,7 +26,7 @@ function App() {
           <Route path={PrivateRoutes.COURSES} element={<CourseVideos />} />
         </Route>
         <Route path={PrivateRoutes.ADMIN_PANEL} element={<AdminPanel />} />
-        <Route path="*" element={<NotFound />} />
+        <Route path="*" element={<NotFound />} /> */}
       </Routes>
     </BrowserRouter>
   );

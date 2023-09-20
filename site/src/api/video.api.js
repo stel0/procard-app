@@ -1,19 +1,18 @@
 import axios from "axios";
 
-const videoApi_videos = axios.create({
-  baseURL: "http://127.0.0.1:8000/videos/api/v1/videos/",
+const api_ = axios.create({
+  baseURL: "http://127.0.0.1:8000/api/",
 });
+export const getVideos = (data) => api_.get("/video/get_videos/")
+export const uploadVideo = (data) => api_.post("/video/upload_video/", data);
+export const deleteVideo = (data) => api_.delete("/video/delete_video/", data);
+export const editVideo = (data) => api_.put("/video/edit_video/", data);
 
-export const getVideos = () => videoApi_videos.get("/");
-export const uploadVideo = (data) => videoApi_videos.post("/", data);
-export const deleteVideo = (data) => videoApi_videos.delete("/", data);
-export const editVideo = (data) => videoApi_videos.put("/", data);
-
-const videoApi_users = axios.create({
-  baseURL: "http://127.0.0.1:8000/videos/api/v1/users/",
-});
-export const getUser = (data) =>
-  videoApi_users.get("/", {
-    params: { ci: data.ci },
-  });
+// const videoApi_users = axios.create({
+//   baseURL: "http://127.0.0.1:8000/videos/api/v1/users/",
+// });
+// export const getUser = (data) =>
+//   videoApi_users.get("/", {
+//     params: { ci: data.ci },
+//   });
 

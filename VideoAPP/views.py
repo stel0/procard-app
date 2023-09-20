@@ -1,20 +1,17 @@
 import os
 import re
 
-
 # Rest Framework
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import permissions, status
 
-
 #Django
 from django.contrib.auth import login, logout
 from django.contrib.auth.models import Group
 from django.conf import settings
 from django.core.exceptions import ValidationError
-
 
 #Custom
 from .models import Video, User
