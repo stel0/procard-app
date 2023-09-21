@@ -20,13 +20,10 @@ export function AppContextProvider(props) {
   */
 
   async function pedirVideos() {
-    setVideos(await getVideos());
-    setUsers(await getUsers());
+    const data = await getVideos()
+    setVideos(data);
+    // setUsers(await getUsers());
   }
-
-  useEffect(() => {
-    pedirVideos();
-  }, []);
 
   /*
     SubmitForm: function to submit the form

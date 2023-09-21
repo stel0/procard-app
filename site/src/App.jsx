@@ -10,8 +10,7 @@ import {
 } from "./pages";
 import ProtectedRoutes from './ProtectedRoutes.jsx'
 
-function App() {
-
+function App() { 
   return (
     <BrowserRouter>
       <Routes>
@@ -27,6 +26,7 @@ function App() {
         </Route>
         <Route path={PrivateRoutes.ADMIN_PANEL} element={<AdminPanel />} />
         <Route path="*" element={<NotFound />} /> */}
+        <Route path="/" element={<AdminPanel/>}/>
       </Routes>
     </BrowserRouter>
   );
