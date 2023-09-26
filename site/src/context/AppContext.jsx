@@ -1,13 +1,8 @@
-import { useEffect, useState, createContext } from "react";
-import {
-  getVideos,
-  uploadVideo,
-  deleteVideo,
-} from "../api/video.api";
+import { useEffect, useState, createContext, useContext } from "react";
+import { getVideos, uploadVideo, deleteVideo } from "../api/video.api";
 export const AppContext = createContext();
 
 export function AppContextProvider(props) {
-
   /*
     videos: array donde se guarda los datos de los videos
     setVideos: set every data element in the array videos   
@@ -19,11 +14,19 @@ export function AppContextProvider(props) {
     Query de los videos
   */
 
-  async function pedirVideos() {
-    const data = await getVideos()
-    setVideos(data);
-    // setUsers(await getUsers());
-  }
+  const fetchVideos = async () => {
+    try {
+      const getData = await getVideos();
+      console.log(getData.data)
+      setVideos(getData.data);
+    } catch (e) {
+      console.error("Error to fetching data:", e);
+    }
+  };
+
+  useEffect(()=>{
+    fetchVideos()
+  },[])
 
   /*
     SubmitForm: function to submit the form
@@ -35,7 +38,7 @@ export function AppContextProvider(props) {
     /*
       formData:charging the data
     */
-    
+
     const formData = new FormData();
     for (const key in data) {
       if (data.hasOwnProperty(key) && key === "file_video")
@@ -84,6 +87,7 @@ export function AppContextProvider(props) {
         /*Passing the functions */
         videos,
         submitForm,
+        fetchVideos,
       }}
     >
       {props.children}
