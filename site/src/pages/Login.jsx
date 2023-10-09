@@ -1,29 +1,30 @@
 import { useForm } from "react-hook-form";
-import { Link,useNavigate } from "react-router-dom";
-import { useContext, useEffect } from "react";
+import { Link, useNavigate, redirect } from "react-router-dom";
+import { useContext, useEffect, useState } from "react";
 import { AppContext } from "../context/AppContext";
-import { PrivateRoutes } from "../routes/routes.js";
+import { PrivateRoutes, PublicRoutes } from "../routes/routes.js";
+import { login_user } from "../api/video.api";
 
 function Landing() {
+  const { login } = useContext(AppContext);
   const navigate = useNavigate();
 
+  const handleLogin = async (data) => {
+    const res = await login(data);
+    typeof res === "object" && res !== null
+      ? navigate(PrivateRoutes.HOME) 
+      : navigate(PublicRoutes.LOGIN);
+  };
   const {
-    handleSubmit,
     register,
+    handleSubmit,
     formState: { errors },
   } = useForm();
-
-  const { login, userLoginMsg, loggedUser } = useContext(AppContext);
-
-  useEffect(() => {
-    console.log(loggedUser.name)
-    if (loggedUser.name) navigate(PrivateRoutes.HOME);
-  }, [loggedUser.name]);
 
   return (
     <>
       <div>
-        <form onSubmit={handleSubmit(login)}>
+        <form onSubmit={handleSubmit(handleLogin)}>
           <input
             type="text"
             placeholder="Ingresa tu cedula."
@@ -43,13 +44,12 @@ function Landing() {
           {errors.password && <span>{errors.password.message}</span>}
 
           <button>Iniciar sesion</button>
-          {userLoginMsg}
         </form>
       </div>
-      <div>
+      {/* <div>
         <p>Eres nuevo?</p>
         <Link to={PrivateRoutes.CREATE_ACCOUNT}>Crear cuenta</Link>
-      </div>
+      </div> */}
     </>
   );
 }

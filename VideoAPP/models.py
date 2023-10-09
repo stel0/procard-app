@@ -40,7 +40,7 @@ class AppUserManager(BaseUserManager):
         user.save()
         return user
 
-    def create_superuser(self, first_name, last_name, ci, email, genre, password=None):
+    def create_superuser(self, first_name, last_name, ci, email, genre, password=None,role=None):
         user = self.create_user(first_name, last_name,
                                 ci, email, genre, password)
         user.is_staff = True

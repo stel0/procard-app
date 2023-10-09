@@ -1,8 +1,15 @@
 import { useEffect, useState, createContext, useContext } from "react";
-import { getVideos, uploadVideo, deleteVideo } from "../api/video.api";
+import { getVideos, uploadVideo, login_user } from "../api/video.api";
+import { useLocation, useNavigate } from "react-router-dom";
 export const AppContext = createContext();
 
 export function AppContextProvider(props) {
+  /* 
+    Logged user 
+  */
+
+  const [user_info, setUser] = useState(null);
+
   /*
     videos: array donde se guarda los datos de los videos
     setVideos: set every data element in the array videos   
@@ -17,17 +24,38 @@ export function AppContextProvider(props) {
   const fetchVideos = async () => {
     try {
       const getData = await getVideos();
-      console.log(getData.data)
+      console.log(getData.data);
       setVideos(getData.data);
     } catch (e) {
       console.error("Error to fetching data:", e);
     }
   };
 
-  useEffect(()=>{
-    fetchVideos()
-  },[])
+  /*
+    Login method
+  */
 
+  const login = async (data) => {
+    try {
+      const response = await login_user(data);
+      console.log(response.data);
+      setUser(response.data);
+      return response;
+    } catch (e) {
+      console.log("login failed");
+    }
+  };
+
+  /*
+    logout method
+  */
+  const logout = async (data) => {
+    try {
+      setUser(null);
+    } catch (error) {
+      console.error("logout failed", e);
+    }
+  };
   /*
     SubmitForm: function to submit the form
   */
@@ -85,9 +113,9 @@ export function AppContextProvider(props) {
     <AppContext.Provider
       value={{
         /*Passing the functions */
-        videos,
-        submitForm,
-        fetchVideos,
+        login,
+        logout,
+        user_info,
       }}
     >
       {props.children}

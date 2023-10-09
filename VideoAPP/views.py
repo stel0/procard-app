@@ -217,7 +217,13 @@ class LoginUser(APIView):
         if serializer.is_valid(raise_exception=True):
             user = serializer.check_user(clean_data)
             login(request, user)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response({'ci':user.ci,
+                              'first_name':user.first_name,
+                              'last_name':user.last_name,
+                              'Company': user.groups.first().name if user.groups.exists() else 0,
+                              'is_banned':user.is_banned,
+                              'is_staff':user.is_staff,
+                              'role':user.role}, status=status.HTTP_200_OK)
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
@@ -253,14 +259,16 @@ class GetUser(APIView):
             return Response({
                         'first_name': serializer.data['first_name'],
                         'last_name': serializer.data['last_name'],
-                        'Company':Group.objects.get(pk=serializer.data['groups'][0]).name}, status=status.HTTP_200_OK)
+                        'is_staff':serializer.data['is_staff'],
+                        'role':serializer.data['role']}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response(status=status.HTTP_400_BAD_REQUEST)
+
 
 """VIDEOS METODOS"""
 
 class GetVideos(APIView):
-    permission_classes = []
+    permission_classes = [permissions.IsAdminUser | isAdmin]
     authentication_classes = [SessionAuthentication]
 
     def get(self, request):

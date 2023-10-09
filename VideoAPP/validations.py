@@ -52,6 +52,8 @@ def video_validation(data):
 def login_validation(data):
     ci = data.get('ci')
     password = data.get('password')
+    print(ci)
+    print(password)
     if not ci or len(ci) > 8:
         raise ValidationError('La contraseña o cedula es incorrecta')
     if not password:
