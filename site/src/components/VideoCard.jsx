@@ -1,17 +1,14 @@
 import { useContext, useEffect, useState } from "react";
 import { AppContext } from "../context/AppContext";
+
 function VideoCard() {
-  const { videos } = useContext(AppContext);
+  const { videos, fetchVideos } = useContext(AppContext);
   const [paths, setPaths] = useState([]);
 
   useEffect(() => {
+    fetchVideos();
     console.log(videos);
-    setPaths(
-      videos.map((video) => {
-        name: `../../../media${video.file_video}`;
-      })
-    );
-  }, []);
+  }, [fetchVideos]);
 
   return (
     <div>
@@ -23,7 +20,7 @@ function VideoCard() {
               src={`../../../media${video.file_video}`}
               type="video/mp4"
             />
-          </video> 
+          </video>
           <h1>{video.description}</h1>
         </div>
       ))}

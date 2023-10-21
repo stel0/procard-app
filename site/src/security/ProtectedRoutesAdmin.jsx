@@ -4,9 +4,9 @@ import { useContext } from "react";
 import { PrivateRoutes } from "../routes/routes";
 
 function ProtectedRoutesAdmin() {
-  const { isLogged } = useContext(AppContext);
+  const { user_info } = useContext(AppContext);
 
-  return isLogged ? <Outlet /> : <Navigate replace to={PrivateRoutes.HOME} />;
+  return user_info.role || user_info.is_staff ? <Outlet /> : <Navigate replace to={PrivateRoutes.HOME} />;
 }
 
 export default ProtectedRoutesAdmin;

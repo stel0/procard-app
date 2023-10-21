@@ -19,6 +19,9 @@ from .serializer import UserRegisterSerializer, UserLoginSerializer, UserSeriali
 from .validations import custom_validation, login_validation,group_validation,video_validation,group_pattern
 from .customPermissions import isAdmin
 
+#google cloud
+from google.cloud import storage
+
 """GRUPOS METODOS"""
 
 class CreateGroup(APIView):

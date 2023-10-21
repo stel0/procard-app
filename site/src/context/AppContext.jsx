@@ -1,6 +1,5 @@
 import { useEffect, useState, createContext, useContext } from "react";
 import { getVideos, uploadVideo, login_user } from "../api/video.api";
-import { useLocation, useNavigate } from "react-router-dom";
 export const AppContext = createContext();
 
 export function AppContextProvider(props) {
@@ -28,6 +27,7 @@ export function AppContextProvider(props) {
       setVideos(getData.data);
     } catch (e) {
       console.error("Error to fetching data:", e);
+      return undefined
     }
   };
 
@@ -116,6 +116,8 @@ export function AppContextProvider(props) {
         login,
         logout,
         user_info,
+        fetchVideos,
+        videos
       }}
     >
       {props.children}
