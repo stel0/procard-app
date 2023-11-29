@@ -1,11 +1,13 @@
 from rest_framework import permissions
+from .serializer import UserSerializer
 
 class isAdmin(permissions.BasePermission):
     def has_permission(self, request, view):
         if(hasattr(request.user, 'role')):
+            print("User role")
+            print(request.user.role)
             return request.user.role == 1
-        return 0
-
+        return False
 class isBannedUser(permissions.BasePermission):
     def has_permission(self, request, view):
         return request.user.is_banned

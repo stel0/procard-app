@@ -1,9 +1,8 @@
 import { useForm } from "react-hook-form";
-import { Link, useNavigate, redirect } from "react-router-dom";
-import { useContext, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useContext } from "react";
 import { AppContext } from "../context/AppContext";
 import { PrivateRoutes, PublicRoutes } from "../routes/routes.js";
-import { login_user } from "../api/video.api";
 
 function Landing() {
   const { login } = useContext(AppContext);
@@ -11,10 +10,13 @@ function Landing() {
 
   const handleLogin = async (data) => {
     const res = await login(data);
-    typeof res === "object" && res !== null
-      ? navigate(PrivateRoutes.HOME) 
-      : navigate(PublicRoutes.LOGIN);
+    if(typeof res === "object" && res !== null){
+      navigate(PrivateRoutes.HOME)
+    }else{
+      navigate(PublicRoutes.LOGIN);
+    }
   };
+  
   const {
     register,
     handleSubmit,

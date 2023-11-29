@@ -9,6 +9,7 @@ from django.core.mail import send_mail
 #My App
 from .models import User, Video
 
+
 """USER SERIALIZER"""
 
 UserModel = get_user_model()
@@ -33,15 +34,14 @@ class UserRegisterSerializer(serializers.ModelSerializer):
     
 class UserLoginSerializer(serializers.Serializer):
 
-    password = serializers.CharField()
+    password = serializers.CharField(write_only=True)
     ci = serializers.CharField()
 
+
     def check_user(self, clean_data):
-        print(clean_data)
         user = authenticate(username=clean_data['ci'], password=clean_data['password'])
-        print(user)
         if not user:
-            raise ValidationError(authenticate(username=clean_data['ci'], password=clean_data['password']))
+            raise ValidationError('Usuario no existe')
         return user
     
 class UserSerializer(serializers.ModelSerializer):
@@ -84,7 +84,6 @@ class UserSerializer(serializers.ModelSerializer):
 #             user_obj = User.objects.get(email=data['email'])
 #             user_obj.set_password(data['password']).save()
 #         return user_obj
-      
 
 
 """VIDEO SERIALIZER"""

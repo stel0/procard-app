@@ -1,6 +1,9 @@
 import { Nav } from "../components";
 
 function Home() {
+
+  
+
   return (
     <div>
       <Nav />

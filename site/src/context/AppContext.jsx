@@ -1,5 +1,5 @@
-import { useEffect, useState, createContext, useContext } from "react";
-import { getVideos, uploadVideo, login_user } from "../api/video.api";
+import { useState, createContext } from "react";
+import { uploadVideo, login_user, check_permissions } from "../api/video.api";
 export const AppContext = createContext();
 
 export function AppContextProvider(props) {
@@ -10,26 +10,24 @@ export function AppContextProvider(props) {
   const [user_info, setUser] = useState(null);
 
   /*
-    videos: array donde se guarda los datos de los videos
-    setVideos: set every data element in the array videos   
-  */
-
-  const [videos, setVideos] = useState([]);
-
-  /*
     Query de los videos
   */
 
-  const fetchVideos = async () => {
+  /* const fetchVideos = async () => {
     try {
-      const getData = await getVideos();
-      console.log(getData.data);
-      setVideos(getData.data);
+      const getData = await getVideos()
+          .then(function (response) {
+          return response;
+        })
+        .catch(function (error) { 
+          return null;
+        });
+      return(getData.data);
     } catch (e) {
       console.error("Error to fetching data:", e);
       return undefined
     }
-  };
+  }; */
 
   /*
     Login method
@@ -40,7 +38,11 @@ export function AppContextProvider(props) {
       const response = await login_user(data);
       console.log(response.data);
       setUser(response.data);
-      return response;
+      if (response.data) {
+        console.log("login success");
+        handlePermissions(response.data);
+      }
+      return response.data;
     } catch (e) {
       console.log("login failed");
     }
@@ -49,6 +51,7 @@ export function AppContextProvider(props) {
   /*
     logout method
   */
+
   const logout = async (data) => {
     try {
       setUser(null);
@@ -56,6 +59,22 @@ export function AppContextProvider(props) {
       console.error("logout failed", e);
     }
   };
+
+  /*
+    Check permissions
+  */
+
+
+  const handlePermissions = async (user_info) => {
+    try {
+      const res = await check_permissions(user_info);
+      console.log(res.data);
+      return res.data;
+    } catch (error) {
+      console.error("An error is ocurred", error);
+    }
+  };
+
   /*
     SubmitForm: function to submit the form
   */
@@ -116,8 +135,7 @@ export function AppContextProvider(props) {
         login,
         logout,
         user_info,
-        fetchVideos,
-        videos
+        handlePermissions,
       }}
     >
       {props.children}

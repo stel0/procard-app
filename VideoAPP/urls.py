@@ -23,6 +23,7 @@ urlpatterns = [
     path("user/get_user/",views.GetUser.as_view()),
     path("user/delete_user/",views.DeleteUser.as_view()),
     path("user/get_all_users/",views.GetUsers.as_view()),
+    path("user/check_permissions/",views.CheckPermissions.as_view()),
     
     # Video
     path("video/upload_video/",views.UploadVideo.as_view()),

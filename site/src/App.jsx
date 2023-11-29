@@ -12,10 +12,14 @@ import {
   ProtectedRoutes,
   ProtectedRoutesAdmin,
 } from "./security/protectedRoute.js";
-import { AppContext } from "./context/AppContext";
-import { useContext } from "react";
+
+
+
+
 function App() {
-  const { isLogged } = useContext(AppContext);
+
+
+
   return (
     <BrowserRouter>
       <Routes>
