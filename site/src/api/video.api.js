@@ -1,11 +1,13 @@
 import axios from "axios";
 
+
 axios.defaults.xsrfCookieName = "csrftoken";
-axios.defaults.xsrfHeaderName = "HTTP_X_CSRFTOKEN";
+axios.defaults.xsrfHeaderName = "X-CSRFToken";
 axios.defaults.withCredentials = true;
 
 const api = axios.create({
   baseURL: "http://127.0.0.1:8000/api/",
+  withCredentials: true,
 });
 
 // Videos
@@ -28,11 +30,11 @@ export const editVideo = (data) => api.put("/video/edit_video/", data);
 
 // User
 
-export const login_user = (data) =>
+export const login_user = (in_data) =>
   api
-    .post("/user/login/", {
-      ci: data.ci,
-      password: data.password,
+    .post("/user/login/",{
+      ci: in_data.ci,
+      password: in_data.password,
     })
     .then(function (response) {
       return response;
@@ -41,11 +43,20 @@ export const login_user = (data) =>
       console.log(error);
     });
 
-export const check_permissions = (data) =>
+export const logout_user = () =>
   api
-    .get("/user/check_permissions/", {
-      ci: data.ci,
+    .get("/user/logout/")
+    .then(function (response) {
+      return response;
     })
+    .catch(function (error) {
+      console.error(error);
+    });
+
+
+export const check_permissions = () =>
+  api
+    .get("/user/check_permissions/")
     .then(function (response) {
       return response;
     })

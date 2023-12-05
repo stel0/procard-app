@@ -233,20 +233,20 @@ class DeleteUser(APIView):
 
 class LoginUser(APIView):
     permission_classes = [permissions.AllowAny]
-    authentication_classes = [SessionAuthentication, BasicAuthentication]
+    authentication_classes = [SessionAuthentication]
 
 
     # descomentar en caso de que el login no funcione
-    """ @csrf_protect_method """
+    """ @csrf_protect_method  """
 
     def post(self, request):
         clean_data = login_validation(request.data)
         serializer = UserLoginSerializer(data=clean_data)
+        print(clean_data)
         if serializer.is_valid(raise_exception=True):
             user = serializer.check_user(clean_data)
             login(request, user)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
 class LogoutUser(APIView):
@@ -255,7 +255,7 @@ class LogoutUser(APIView):
 
     def post(self, request):
         logout(request)
-        return Response(status=status.HTTP_200_OK)
+        return Response("Logged out",status=status.HTTP_200_OK)
 
 
 class GetUsers(APIView):
@@ -289,12 +289,12 @@ class GetUser(APIView):
 
 class CheckPermissions(APIView):
     permission_classes = [permissions.IsAuthenticated]
-    authentication_classes = [SessionAuthentication, BasicAuthentication]
+    authentication_classes = [SessionAuthentication]
 
     def get(self, request):
         try:
-            serializer = UserSerializer(request.user)
-            return Response(bool(serializer.data['is_staff'] or serializer.data['role'] is 1), status=status.HTTP_200_OK)
+            serializer = UserSerializer(request.user)   
+            return Response(bool(serializer.data['is_staff'] or serializer.data['role'] == 1), status=status.HTTP_200_OK)
         except Exception as e:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 

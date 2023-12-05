@@ -1,5 +1,5 @@
 import { useState, createContext } from "react";
-import { uploadVideo, login_user, check_permissions } from "../api/video.api";
+import { uploadVideo, login_user, check_permissions,logout_user } from "../api/video.api";
 export const AppContext = createContext();
 
 export function AppContextProvider(props) {
@@ -7,7 +7,7 @@ export function AppContextProvider(props) {
     Logged user 
   */
 
-  const [user_info, setUser] = useState(null);
+  const [user_info, setUser] = useState();
 
   /*
     Query de los videos
@@ -36,11 +36,11 @@ export function AppContextProvider(props) {
   const login = async (data) => {
     try {
       const response = await login_user(data);
-      console.log(response.data);
-      setUser(response.data);
+      console.log(response);
+      setUser(true);
       if (response.data) {
         console.log("login success");
-        handlePermissions(response.data);
+        handlePermissions();
       }
       return response.data;
     } catch (e) {
@@ -54,7 +54,8 @@ export function AppContextProvider(props) {
 
   const logout = async (data) => {
     try {
-      setUser(null);
+      const res = await logout_user();
+      return res;
     } catch (error) {
       console.error("logout failed", e);
     }
@@ -65,11 +66,10 @@ export function AppContextProvider(props) {
   */
 
 
-  const handlePermissions = async (user_info) => {
+  const handlePermissions = async () => {
     try {
-      const res = await check_permissions(user_info);
-      console.log(res.data);
-      return res.data;
+      const res = await check_permissions();
+      return res;
     } catch (error) {
       console.error("An error is ocurred", error);
     }

@@ -5,13 +5,15 @@ import { AppContext } from "../context/AppContext";
 
 function Nav() {
   const { logout, user_info, hasPermissions } = useContext(AppContext);
+
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout();
-    navigate(PublicRoutes.LOGIN);
+  const handleLogout = async() => {
+    const res = await logout();
+    if (res)
+      navigate(PublicRoutes.LOGIN);
   };
-
+  
   return (
     <div>
       <NavLink to={PrivateRoutes.HOME}>Inicio</NavLink>

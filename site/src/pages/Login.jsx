@@ -9,6 +9,7 @@ function Landing() {
   const navigate = useNavigate();
 
   const handleLogin = async (data) => {
+    console.log(data);
     const res = await login(data);
     if(typeof res === "object" && res !== null){
       navigate(PrivateRoutes.HOME)
